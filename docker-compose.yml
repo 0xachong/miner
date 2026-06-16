@@ -1,0 +1,19 @@
+services:
+  pearl-miner:
+    image: ghcr.io/0xachong/miner:latest
+    # build: .
+    container_name: pearl-miner
+    restart: unless-stopped
+    env_file: .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # 用中转隧道时挂 SSH 私钥(对应 .env 的 RELAY_KEY_PATH):
+    # volumes:
+    #   - ./relay_key:/run/secrets/relay_key:ro
+    # 设功耗墙(POWER_LIMIT_PCT)时需要:
+    # cap_add: [SYS_ADMIN]

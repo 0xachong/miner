@@ -1,0 +1,11 @@
+.env
+*.key
+*.pem
+tunnel_key*
+relay_key*
+*.seed
+secrets/
+alpha-miner
+lpminer
+*.tgz
+*.tar.gz
