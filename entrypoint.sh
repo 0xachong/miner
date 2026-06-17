@@ -42,6 +42,20 @@ start_relay() {
   echo "[pearl-miner] 隧道就绪,矿机将连 $POOL"
 }
 
+# 轻量 HTTP 健康端:满足推理平台(如 EdgeOne Infer)对服务端口的就绪/健康探针。
+# 矿机本身不监听端口,这里用 socat 在 $PORT 上恒回 200 OK,矿机仍在后台正常挖。
+start_health() {
+  local port="${PORT:-8080}"
+  if ! command -v socat >/dev/null 2>&1; then
+    echo "[warn] 容器内无 socat,跳过健康端口(平台健康探针可能失败)"
+    return
+  fi
+  echo "[pearl-miner] 健康检查 HTTP 监听 0.0.0.0:$port"
+  socat -T2 TCP-LISTEN:"$port",reuseaddr,fork SYSTEM:/opt/miner/health.sh &
+}
+
+start_health
+
 [[ -n "$RELAY_HOST" ]] && start_relay
 
 echo "[pearl-miner] wallet=${WALLET:0:10}...${WALLET: -6} pool=$POOL worker=$WORKER devices=$DEVICES"
