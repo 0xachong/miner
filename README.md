@@ -52,3 +52,14 @@ push 到 `main` 后 GitHub Actions 自动 build 并发布到 `ghcr.io/0xachong/m
 
 ## 许可
 仓库(Dockerfile/脚本)MIT。`alpha-miner` 二进制版权归其作者(含抽水),使用即接受其条款。
+
+## 上报到中控 Dashboard
+走中转隧道(`RELAY_*`)的容器,可顺带把指标(GPU/算力/隧道/系统)推到中控 dashboard:
+```bash
+docker run -d --gpus all \
+  -e WALLET=prl1... -e RELAY_HOST=ubuntu@中转机 -e POOL_UPSTREAM=矿池host:port \
+  -v /path/relay_key:/run/secrets/relay_key:ro \
+  -e REPORT=on -e HOST_ID=mybox-01 \
+  ghcr.io/0xachong/miner:latest
+```
+原理:容器内 `agent.py` 每 30s 采集,复用中转私钥 SSH 到中继 `localhost:8080/api/report`。dashboard 8080 只绑 127.0.0.1,所以上报必须经中转 SSH(本镜像已自动处理)。
